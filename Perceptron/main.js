@@ -1,4 +1,6 @@
 
+var red_values = []
+var blue_values = []
 
 var ctx = document.getElementById('myChart');
 var myChart = new Chart(ctx, {
@@ -85,6 +87,7 @@ function FuncOnClick(event) {
                     x: valueX,
                     y: valueY
                 });
+                red_values.push([valueX, valueY])
                 myChart.update();
                 break;
             case 3:
@@ -92,13 +95,14 @@ function FuncOnClick(event) {
                     x: valueX,
                     y: valueY
                 });
+                blue_values.push([valueX, valueY])
                 myChart.update();
                 break;
         }
     }
 }
 
-// function showValues() {
-//     var values = myChart.data.datasets[2].data.
-//     alert(values)
-// }
+function showValues() {
+    alert(JSON.stringify(red_values))
+    alert(JSON.stringify(blue_values))
+}
