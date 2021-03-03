@@ -25,13 +25,9 @@ var myChart = new Chart(ctx, {
                 x: 2,
                 y: 2
             }],
-
             showLine: true,
-
             fill: false,
-
             backgroundColor: '#fff200',
-
             borderColor: '#fff200',
         }
         ]

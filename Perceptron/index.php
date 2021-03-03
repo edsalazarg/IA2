@@ -25,7 +25,6 @@
             </div>
             <div class="col-lg-5">
                 <button class="btn btn-primary" onclick="showValues()">MostrarValores</button>
-
             </div>
         </div>
     </div>
