@@ -79,23 +79,48 @@ function FuncOnClick(event) {
     if (valueY < 5 && valueY > -5 && valueX < 5 && valueX > -5 ){
         switch (event.which) {
             case 1:
+                //Dibujar punto en la grafica
                 myChart.data.datasets[0].data.push({
                     x: valueX,
                     y: valueY
                 });
                 red_values.push([valueX, valueY])
                 myChart.update();
+                // agregar coordenadas a la tabla
+                var tabla = document.getElementById('tablaRojos').getElementsByTagName('tbody')[0];
+                var newRow = tabla.insertRow();
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(valueX.toFixed(2));
+                newCell.appendChild(newText);
+                newCell = newRow.insertCell();
+                newText = document.createTextNode(valueY.toFixed(2));
+                newCell.appendChild(newText);
                 break;
             case 3:
+                //Dibujar punto en la grafica
                 myChart.data.datasets[1].data.push({
                     x: valueX,
                     y: valueY
                 });
                 blue_values.push([valueX, valueY])
                 myChart.update();
+                // agregar coordenadas a la tabla
+                var tabla = document.getElementById('tablaAzules');
+                var newRow = tabla.insertRow();
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(valueX.toFixed(2));
+                newCell.appendChild(newText);
+                newCell = newRow.insertCell();
+                newText = document.createTextNode(valueY.toFixed(2));
+                newCell.appendChild(newText);
                 break;
         }
     }
+}
+
+function dibujarLinea(coordenadas){
+  myChart.data.datasets[2].data = coordenadas;
+  myChart.update();
 }
 
 function showValues() {
