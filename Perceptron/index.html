@@ -19,66 +19,66 @@
             Perceptron
         </div>
         <div class="card-body">
-          <div class="row">
-            <div class="col-lg-7">
-                <canvas id="myChart" oncontextmenu="return false"></canvas>
-                <div class="">
-                    <button class="btn btn-primary" onclick="">Inicializa</button>
-                    <button class="btn btn-primary" disabled onclick="">Perceptron</button>
+            <div class="row">
+                <div class="col-lg-7">
+                    <canvas id="myChart" oncontextmenu="return false"></canvas>
+                    <div class="">
+                        <button class="btn btn-primary" onclick="">Inicializa</button>
+                        <button class="btn btn-primary" disabled onclick="">Perceptron</button>
+                    </div>
+                </div>
+                <div class="col-4 col-md-2 mt-3">
+                    <label for="learningRate" class="form-label">Learning rate</label>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">&eta;</span>
+                        <input type="text" class="form-control " id="learningRate" value="0.4">
+                    </div>
+                    <label for="epochNumber" class="form-label">Epoch number</label>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">#</span>
+                        <input type="text" class="form-control" id="epochNumber" value="50">
+                    </div>
+                    <h6>Puntos rojos</h6>
+                    <table id="tablaRojos" class="table table-sm table-bordered">
+                        <thead>
+                        <tr>
+                            <th>X</th>
+                            <th>Y</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                    <h6>Puntos azules</h6>
+                    <table id="tablaAzules" class="table table-sm table-bordered">
+                        <thead>
+                        <tr>
+                            <th>X</th>
+                            <th>Y</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-3 col-sm-2 mt-3">
+                    <h6>Pesos</h6>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">w0</span>
+                        <input type="text" class="form-control " id="w0" value="0.4">
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">w1</span>
+                        <input type="text" class="form-control " id="w1" value="0.4">
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">w2</span>
+                        <input type="text" class="form-control " id="w2" value="0.4">
+                    </div>
                 </div>
             </div>
-            <div class="col-4 col-md-2 mt-3">
-              <label for="learningRate" class="form-label">Learning rate</label>
-              <div class="input-group mb-3">
-                <span class="input-group-text">&eta;</span>
-                <input type="text" class="form-control " id="learningRate" value="0.4">
-              </div>
-              <label for="epochNumber" class="form-label">Epoch number</label>
-              <div class="input-group mb-3">
-                <span class="input-group-text">#</span>
-                <input type="text" class="form-control" id="epochNumber" value="50">
-              </div>
-              <h6>Puntos rojos</h6>
-              <table id="tablaRojos" class="table table-sm table-bordered">
-                <thead>
-                  <tr>
-                    <th>X</th>
-                    <th>Y</th>
-                  </tr>
-                </thead>
-                <tbody>
-
-                </tbody>
-              </table>
-              <h6>Puntos azules</h6>
-              <table id="tablaAzules" class="table table-sm table-bordered">
-                <thead>
-                  <tr>
-                    <th>X</th>
-                    <th>Y</th>
-                  </tr>
-                </thead>
-                <tbody>
-
-                </tbody>
-              </table>
-            </div>
-            <div class="col-3 col-sm-2 mt-3">
-              <h6>Pesos</h6>
-              <div class="input-group mb-3">
-                <span class="input-group-text">w0</span>
-                <input type="text" class="form-control " id="learningRate" value="0.4">
-              </div>
-              <div class="input-group mb-3">
-                <span class="input-group-text">w1</span>
-                <input type="text" class="form-control " id="learningRate" value="0.4">
-              </div>
-              <div class="input-group mb-3">
-                <span class="input-group-text">w2</span>
-                <input type="text" class="form-control " id="learningRate" value="0.4">
-              </div>
-            </div>
-          </div>
 
         </div>
     </div>
