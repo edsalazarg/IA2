@@ -2,6 +2,7 @@
 var trained = false
 var final_weights = []
 var data = []
+var confussion_matriz = [0,0,0,0]
 var ctx = document.getElementById('myChart');
 var myChart = new Chart(ctx, {
     type: 'scatter',
@@ -182,14 +183,20 @@ function train_weights(matrix,weights,epochs,l_rate){
 
             if (checked_pred === false){
                 if (prediction === 1){
+                    confussion_matriz[1]++
                     error = -1;
                 }else{
+                    confussion_matriz[2]++
                     error = 1;
                 }
                 for (let j = 0; j < weights.length; j++){
                     weights[j] = weights[j] + (l_rate * error * matrix[i][j]);
-
                 }
+            }else{
+                if (prediction === 1)
+                    confussion_matriz[3]++
+                else
+                    confussion_matriz[0]++
             }
         }
         all_coord.push(get_coordinates(weights))
@@ -259,4 +266,10 @@ function dibujarLinea(iter){
     myChart.update();
     if (iter<(parseInt(document.getElementById("epochNumber").value)-1))
         setTimeout (function() { dibujarLinea(iter+1); }, 200);
+    else{
+        document.getElementById("zerozero").innerHTML = confussion_matriz[0];
+        document.getElementById("zeroone").innerHTML = confussion_matriz[1];
+        document.getElementById("onezero").innerHTML = confussion_matriz[2];
+        document.getElementById("oneone").innerHTML = confussion_matriz[3];
+    }
 }
