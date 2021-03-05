@@ -144,7 +144,6 @@ function train_weights(matrix,weights,epochs,l_rate){
         // console.log("Epoch " + (epoch+1));
         // console.log(weights)
         for (let i = 0; i < matrix.length; i++) {
-            all_coord.push(get_coordinates(weights))
             prediction = predict(matrix[i], weights);
             checked_pred = prediction === matrix[i][3]
 
@@ -160,6 +159,7 @@ function train_weights(matrix,weights,epochs,l_rate){
                 }
             }
         }
+        all_coord.push(get_coordinates(weights))
     }
     return weights;
 }
@@ -198,6 +198,6 @@ function dibujarLinea(iter){
     console.log(all_coord[iter])
     myChart.data.datasets[2].data = all_coord[iter];
     myChart.update();
-    if (iter<parseInt(document.getElementById("epochNumber").value))
+    if (iter<(parseInt(document.getElementById("epochNumber").value)-1))
         setTimeout (function() { dibujarLinea(iter+1); }, 1000);
 }
