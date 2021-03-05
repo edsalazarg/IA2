@@ -28,6 +28,7 @@
                     <div class="">
                         <button class="btn btn-primary" id="initialize" onclick="initialize()">Inicializa</button>
                         <button class="btn btn-primary" disabled id="train">Entrenamiento</button>
+                        <button class="btn btn-primary" id="restart" disabled onclick="restart()">Reiniciar</button>
                     </div>
                     <div class="col-lg-4">
                         <h6>Datos de Prueba</h6>
@@ -54,7 +55,7 @@
                     <label for="epochNumber" class="form-label">Epoch number</label>
                     <div class="input-group mb-3">
                         <span class="input-group-text">#</span>
-                        <input type="text" class="form-control" id="epochNumber" value="50">
+                        <input type="text" class="form-control" id="epochNumber" value="10">
                     </div>
                     <h6>Puntos rojos</h6>
                     <table id="tablaRojos" class="table table-sm table-bordered">

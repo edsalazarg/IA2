@@ -1,6 +1,5 @@
 
 var trained = false
-var tested_data = []
 var final_weights = []
 var data = []
 var ctx = document.getElementById('myChart');
@@ -224,13 +223,33 @@ function initialize(){
 function train(){
     document.getElementById('train').disabled = true;
     document.getElementById('initialize').disabled = true;
+    document.getElementById('restart').disabled = false;
     let w0 = parseFloat(document.getElementById("w0").value);
     let w1 = parseFloat(document.getElementById("w1").value);
     let w2 = parseFloat(document.getElementById("w2").value);
     let epochs = parseInt(document.getElementById("epochNumber").value);
     let l_rate =  parseFloat(document.getElementById("learningRate").value);
     let weights = [w0, w1, w2];
-    final_weights = train_weights(data,weights,epochs,l_rate)
+    final_weights = train_weights(data,weights,epochs=10,l_rate)
+}
+
+function restart(){
+    document.getElementById('initialize').disabled = false;
+    document.getElementById('restart').disabled = true;
+    document.getElementById("w0").value = '';
+    document.getElementById("w1").value = '';
+    document.getElementById("w2").value = '';
+    data = []
+    $("#tablaAzules tr").remove();
+    $("#tablaRojos tr").remove();
+    $("#tablaPrueba tr").remove();
+    myChart.data.datasets[0].data = []
+    myChart.data.datasets[1].data = []
+    myChart.data.datasets[2].data = []
+    myChart.data.datasets[3].data = []
+    myChart.update()
+    all_coord = []
+    trained = false
 }
 
 function dibujarLinea(iter){
