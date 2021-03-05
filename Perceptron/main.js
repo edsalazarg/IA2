@@ -1,5 +1,5 @@
 
-
+var initialized = false
 var data = []
 var ctx = document.getElementById('myChart');
 var myChart = new Chart(ctx, {
@@ -136,14 +136,14 @@ function predict(inputs, weights){
     return (total_activation > threshold) ? 1 : 0;
 }
 
+var all_coord = []
 function train_weights(matrix,weights,epochs,l_rate){
     let prediction;
     let error;
     for (let epoch = 0; epoch < epochs; epoch++) {
-        console.log("Epoch " + (epoch+1));
-        console.log(weights)
+        // console.log("Epoch " + (epoch+1));
+        // console.log(weights)
         for (let i = 0; i < matrix.length; i++) {
-            dibujarLinea(get_coordinates(weights))
             prediction = predict(matrix[i], weights);
             checked_pred = prediction === matrix[i][3]
 
@@ -159,9 +159,16 @@ function train_weights(matrix,weights,epochs,l_rate){
                 }
             }
         }
+        all_coord.push(get_coordinates(weights))
     }
     return weights;
 }
+var myVar;
+
+$( "#train" ).click(function() {
+    train()
+    setTimeout (function() { dibujarLinea(0); }, 1000);
+});
 
 function initialize(){
     document.getElementById("w0").value = (Math.random() * .5  * (Math.round(Math.random()) ? 1 : -1)).toFixed(2);
@@ -171,7 +178,9 @@ function initialize(){
     let w1 = parseFloat(document.getElementById("w1").value);
     let w2 = parseFloat(document.getElementById("w2").value);
     let weights = [w0, w1, w2];
-    dibujarLinea(get_coordinates(weights))
+    document.getElementById('train').disabled = false;
+    myChart.data.datasets[2].data = get_coordinates(weights);
+    myChart.update();
 }
 
 function train(){
@@ -184,7 +193,11 @@ function train(){
     final_weights = train_weights(data,weights,epochs,l_rate)
 }
 
-function dibujarLinea(coordenadas){
-    myChart.data.datasets[2].data = coordenadas;
+function dibujarLinea(iter){
+    document.getElementById("epochiter").innerHTML = iter;
+    console.log(all_coord[iter])
+    myChart.data.datasets[2].data = all_coord[iter];
     myChart.update();
+    if (iter<(parseInt(document.getElementById("epochNumber").value)-1))
+        setTimeout (function() { dibujarLinea(iter+1); }, 1000);
 }
