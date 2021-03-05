@@ -1,5 +1,5 @@
 
-
+var initialized = false
 var data = []
 var ctx = document.getElementById('myChart');
 var myChart = new Chart(ctx, {
@@ -170,14 +170,6 @@ $( "#train" ).click(function() {
     setTimeout (function() { dibujarLinea(0); }, 1000);
 });
 
-$( "#epochiter" ).change(function() {
-    let value = parseInt(document.getElementById("epochiter").innerHTML);
-    let epochs = parseInt(document.getElementById("epochNumber").value);
-    if(value < epochs){
-        clearInterval(myVar)
-    }
-});
-
 function initialize(){
     document.getElementById("w0").value = (Math.random() * .5  * (Math.round(Math.random()) ? 1 : -1)).toFixed(2);
     document.getElementById("w1").value = (Math.random() * .5 * (Math.round(Math.random()) ? 1 : -1)).toFixed(2);
@@ -186,6 +178,7 @@ function initialize(){
     let w1 = parseFloat(document.getElementById("w1").value);
     let w2 = parseFloat(document.getElementById("w2").value);
     let weights = [w0, w1, w2];
+    document.getElementById('train').disabled = false;
     myChart.data.datasets[2].data = get_coordinates(weights);
     myChart.update();
 }
@@ -205,5 +198,6 @@ function dibujarLinea(iter){
     console.log(all_coord[iter])
     myChart.data.datasets[2].data = all_coord[iter];
     myChart.update();
-    myVar = setTimeout (function() { dibujarLinea(iter+1); }, 1000);
+    if (iter<parseInt(document.getElementById("epochNumber").value))
+        setTimeout (function() { dibujarLinea(iter+1); }, 1000);
 }
