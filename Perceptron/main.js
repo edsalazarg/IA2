@@ -230,7 +230,6 @@ function initialize(){
 function train(){
     document.getElementById('train').disabled = true;
     document.getElementById('initialize').disabled = true;
-    document.getElementById('restart').disabled = false;
     let w0 = parseFloat(document.getElementById("w0").value);
     let w1 = parseFloat(document.getElementById("w1").value);
     let w2 = parseFloat(document.getElementById("w2").value);
@@ -267,9 +266,15 @@ function dibujarLinea(iter){
     if (iter<(parseInt(document.getElementById("epochNumber").value)-1))
         setTimeout (function() { dibujarLinea(iter+1); }, 200);
     else{
+        document.getElementById('restart').disabled = false;
         document.getElementById("zerozero").innerHTML = confussion_matriz[0];
         document.getElementById("zeroone").innerHTML = confussion_matriz[1];
         document.getElementById("onezero").innerHTML = confussion_matriz[2];
         document.getElementById("oneone").innerHTML = confussion_matriz[3];
+        document.getElementById("total").innerHTML = confussion_matriz[0] + confussion_matriz[1] + confussion_matriz[2] + confussion_matriz[3];
+        document.getElementById("actualno").innerHTML = confussion_matriz[0] + confussion_matriz[1];
+        document.getElementById("actualyes").innerHTML = confussion_matriz[2] + confussion_matriz[3];
+        document.getElementById("predno").innerHTML = confussion_matriz[0] + confussion_matriz[2];
+        document.getElementById("predyes").innerHTML = confussion_matriz[1] + confussion_matriz[3];
     }
 }
