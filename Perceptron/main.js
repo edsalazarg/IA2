@@ -1,7 +1,6 @@
 
-var red_values = []
-var blue_values = []
 
+var data = []
 var ctx = document.getElementById('myChart');
 var myChart = new Chart(ctx, {
     type: 'scatter',
@@ -18,13 +17,7 @@ var myChart = new Chart(ctx, {
         },
         {
             label: 'Line Dataset',
-            data: [{
-                x: -2,
-                y: -2
-            },{
-                x: 2,
-                y: 2
-            }],
+            data: [],
             showLine: true,
             fill: false,
             backgroundColor: '#fff200',
@@ -84,7 +77,7 @@ function FuncOnClick(event) {
                     x: valueX,
                     y: valueY
                 });
-                red_values.push([valueX, valueY])
+                data.push([1,valueX, valueY,0])
                 myChart.update();
                 // agregar coordenadas a la tabla
                 var tabla = document.getElementById('tablaRojos').getElementsByTagName('tbody')[0];
@@ -102,7 +95,7 @@ function FuncOnClick(event) {
                     x: valueX,
                     y: valueY
                 });
-                blue_values.push([valueX, valueY])
+                data.push([1, valueX, valueY,1])
                 myChart.update();
                 // agregar coordenadas a la tabla
                 var tabla = document.getElementById('tablaAzules');
@@ -118,12 +111,80 @@ function FuncOnClick(event) {
     }
 }
 
-function dibujarLinea(coordenadas){
-  myChart.data.datasets[2].data = coordenadas;
-  myChart.update();
+function get_coordinates(weights){
+    let coordinates = []
+    let slope = -(weights[0]/weights[2])/(weights[0]/weights[1])
+    let intercept = -weights[0]/weights[2]
+    for (let i = -5; i<=5; i+=.1){
+        y1 = (slope*i) + intercept
+
+        coordinates.push({
+            x: i,
+            y: y1
+        })
+    }
+    return coordinates
+
 }
 
-function showValues() {
-    alert(JSON.stringify(red_values))
-    alert(JSON.stringify(blue_values))
+function predict(inputs, weights){
+    let threshold = 0.0;
+    let total_activation = 0.0;
+    for (let index = 0; index < 3; index++){
+        total_activation += inputs[index] * weights[index];
+    }
+    return (total_activation > threshold) ? 1 : 0;
+}
+
+function train_weights(matrix,weights,epochs,l_rate){
+    let prediction;
+    let error;
+    for (let epoch = 0; epoch < epochs; epoch++) {
+        console.log("Epoch " + (epoch+1));
+        console.log(weights)
+        for (let i = 0; i < matrix.length; i++) {
+            dibujarLinea(get_coordinates(weights))
+            prediction = predict(matrix[i], weights);
+            checked_pred = prediction === matrix[i][3]
+
+            if (checked_pred === false){
+                if (prediction === 1){
+                    error = -1;
+                }else{
+                    error = 1;
+                }
+                for (let j = 0; j < weights.length; j++){
+                    weights[j] = weights[j] + (l_rate * error * matrix[i][j]);
+
+                }
+            }
+        }
+    }
+    return weights;
+}
+
+function initialize(){
+    document.getElementById("w0").value = (Math.random() * .5  * (Math.round(Math.random()) ? 1 : -1)).toFixed(2);
+    document.getElementById("w1").value = (Math.random() * .5 * (Math.round(Math.random()) ? 1 : -1)).toFixed(2);
+    document.getElementById("w2").value = (Math.random() * .5 * (Math.round(Math.random()) ? 1 : -1)).toFixed(2);
+    let w0 = parseFloat(document.getElementById("w0").value);
+    let w1 = parseFloat(document.getElementById("w1").value);
+    let w2 = parseFloat(document.getElementById("w2").value);
+    let weights = [w0, w1, w2];
+    dibujarLinea(get_coordinates(weights))
+}
+
+function train(){
+    let w0 = parseFloat(document.getElementById("w0").value);
+    let w1 = parseFloat(document.getElementById("w1").value);
+    let w2 = parseFloat(document.getElementById("w2").value);
+    let epochs = parseInt(document.getElementById("epochNumber").value);
+    let l_rate =  parseFloat(document.getElementById("learningRate").value);
+    let weights = [w0, w1, w2];
+    final_weights = train_weights(data,weights,epochs,l_rate)
+}
+
+function dibujarLinea(coordenadas){
+    myChart.data.datasets[2].data = coordenadas;
+    myChart.update();
 }
