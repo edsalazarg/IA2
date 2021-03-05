@@ -1,28 +1,35 @@
 
-var initialized = false
+var trained = false
+var tested_data = []
+var final_weights = []
 var data = []
 var ctx = document.getElementById('myChart');
 var myChart = new Chart(ctx, {
     type: 'scatter',
     data: {
         datasets: [{
-            label: 'Scatter Dataset',
+            label: 'Red data',
             data: [],
             backgroundColor: '#FF0000',
         },
         {
-            label: 'Scatter Dataset',
+            label: 'Blue Data',
             data: [],
             backgroundColor: '#0040ff'
         },
         {
-            label: 'Line Dataset',
+            label: 'Weighted Line',
             data: [],
             showLine: true,
             fill: false,
             backgroundColor: '#fff200',
             borderColor: '#fff200',
-        }
+        },
+        {
+            label: 'Test Data',
+            data: [],
+            backgroundColor: '#26ff00'
+        },
         ]
     },
     options: {
@@ -69,44 +76,71 @@ function FuncOnClick(event) {
             valueY = scaleRef.getValueForPixel(event.offsetY);
         }
     }
-    if (valueY < 5 && valueY > -5 && valueX < 5 && valueX > -5 ){
-        switch (event.which) {
-            case 1:
-                //Dibujar punto en la grafica
-                myChart.data.datasets[0].data.push({
-                    x: valueX,
-                    y: valueY
-                });
-                data.push([1,valueX, valueY,0])
-                myChart.update();
-                // agregar coordenadas a la tabla
-                var tabla = document.getElementById('tablaRojos').getElementsByTagName('tbody')[0];
-                var newRow = tabla.insertRow();
-                var newCell = newRow.insertCell();
-                var newText = document.createTextNode(valueX.toFixed(2));
-                newCell.appendChild(newText);
-                newCell = newRow.insertCell();
-                newText = document.createTextNode(valueY.toFixed(2));
-                newCell.appendChild(newText);
-                break;
-            case 3:
-                //Dibujar punto en la grafica
-                myChart.data.datasets[1].data.push({
-                    x: valueX,
-                    y: valueY
-                });
-                data.push([1, valueX, valueY,1])
-                myChart.update();
-                // agregar coordenadas a la tabla
-                var tabla = document.getElementById('tablaAzules');
-                var newRow = tabla.insertRow();
-                var newCell = newRow.insertCell();
-                var newText = document.createTextNode(valueX.toFixed(2));
-                newCell.appendChild(newText);
-                newCell = newRow.insertCell();
-                newText = document.createTextNode(valueY.toFixed(2));
-                newCell.appendChild(newText);
-                break;
+    if (trained){
+    //    Agregar set de datos para despues de entranado
+        myChart.data.datasets[3].data.push({
+            x: valueX,
+            y: valueY
+        });
+        prediction = predict([1,valueX, valueY], final_weights)
+        if (prediction === 1){
+            prediction = "Azul"
+        }else{
+            prediction = "Rojo"
+        }
+
+        var tabla = document.getElementById('tablaPrueba').getElementsByTagName('tbody')[0];
+        var newRow = tabla.insertRow();
+        var newCell = newRow.insertCell();
+        var newText = document.createTextNode(valueX.toFixed(2));
+        newCell.appendChild(newText);
+        newCell = newRow.insertCell();
+        newText = document.createTextNode(valueY.toFixed(2));
+        newCell.appendChild(newText);
+        newCell = newRow.insertCell();
+        newText = document.createTextNode(prediction);
+        newCell.appendChild(newText);
+        myChart.update();
+    }else{
+        if (valueY < 5 && valueY > -5 && valueX < 5 && valueX > -5 ){
+            switch (event.which) {
+                case 1:
+                    //Dibujar punto en la grafica
+                    myChart.data.datasets[0].data.push({
+                        x: valueX,
+                        y: valueY
+                    });
+                    data.push([1,valueX, valueY,0])
+                    myChart.update();
+                    // agregar coordenadas a la tabla
+                    var tabla = document.getElementById('tablaRojos').getElementsByTagName('tbody')[0];
+                    var newRow = tabla.insertRow();
+                    var newCell = newRow.insertCell();
+                    var newText = document.createTextNode(valueX.toFixed(2));
+                    newCell.appendChild(newText);
+                    newCell = newRow.insertCell();
+                    newText = document.createTextNode(valueY.toFixed(2));
+                    newCell.appendChild(newText);
+                    break;
+                case 3:
+                    //Dibujar punto en la grafica
+                    myChart.data.datasets[1].data.push({
+                        x: valueX,
+                        y: valueY
+                    });
+                    data.push([1, valueX, valueY,1])
+                    myChart.update();
+                    // agregar coordenadas a la tabla
+                    var tabla = document.getElementById('tablaAzules');
+                    var newRow = tabla.insertRow();
+                    var newCell = newRow.insertCell();
+                    var newText = document.createTextNode(valueX.toFixed(2));
+                    newCell.appendChild(newText);
+                    newCell = newRow.insertCell();
+                    newText = document.createTextNode(valueY.toFixed(2));
+                    newCell.appendChild(newText);
+                    break;
+            }
         }
     }
 }
@@ -141,8 +175,8 @@ function train_weights(matrix,weights,epochs,l_rate){
     let prediction;
     let error;
     for (let epoch = 0; epoch < epochs; epoch++) {
-        // console.log("Epoch " + (epoch+1));
-        // console.log(weights)
+        console.log("Epoch " + (epoch+1));
+        console.log(weights)
         for (let i = 0; i < matrix.length; i++) {
             prediction = predict(matrix[i], weights);
             checked_pred = prediction === matrix[i][3]
@@ -163,11 +197,15 @@ function train_weights(matrix,weights,epochs,l_rate){
     }
     return weights;
 }
-var myVar;
 
 $( "#train" ).click(function() {
-    train()
-    setTimeout (function() { dibujarLinea(0); }, 1000);
+    if (data.length === 0)
+        alert("Empty Data")
+    else{
+        train();
+        trained = true;
+        setTimeout (function() { dibujarLinea(0); }, 200);
+    }
 });
 
 function initialize(){
@@ -184,6 +222,8 @@ function initialize(){
 }
 
 function train(){
+    document.getElementById('train').disabled = true;
+    document.getElementById('initialize').disabled = true;
     let w0 = parseFloat(document.getElementById("w0").value);
     let w1 = parseFloat(document.getElementById("w1").value);
     let w2 = parseFloat(document.getElementById("w2").value);
@@ -194,10 +234,9 @@ function train(){
 }
 
 function dibujarLinea(iter){
-    document.getElementById("epochiter").innerHTML = iter;
-    console.log(all_coord[iter])
+    document.getElementById("epochiter").innerHTML = iter+1;
     myChart.data.datasets[2].data = all_coord[iter];
     myChart.update();
     if (iter<(parseInt(document.getElementById("epochNumber").value)-1))
-        setTimeout (function() { dibujarLinea(iter+1); }, 1000);
+        setTimeout (function() { dibujarLinea(iter+1); }, 200);
 }
