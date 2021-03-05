@@ -19,12 +19,15 @@
             Perceptron
         </div>
         <div class="card-body">
+            <div>
+                <h1>Epoch: </h1><h1 id="epochiter">None</h1>
+            </div>
             <div class="row">
                 <div class="col-lg-7">
                     <canvas id="myChart" oncontextmenu="return false"></canvas>
                     <div class="">
                         <button class="btn btn-primary" onclick="initialize()">Inicializa</button>
-                        <button class="btn btn-primary" onclick="train()">Entrenamiento</button>
+                        <button class="btn btn-primary" id="train">Entrenamiento</button>
                     </div>
                 </div>
                 <div class="col-4 col-md-2 mt-3">
