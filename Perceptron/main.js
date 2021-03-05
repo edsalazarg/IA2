@@ -230,12 +230,13 @@ function train(){
     let epochs = parseInt(document.getElementById("epochNumber").value);
     let l_rate =  parseFloat(document.getElementById("learningRate").value);
     let weights = [w0, w1, w2];
-    final_weights = train_weights(data,weights,epochs=10,l_rate)
+    final_weights = train_weights(data,weights,epochs,l_rate)
 }
 
 function restart(){
     document.getElementById('initialize').disabled = false;
     document.getElementById('restart').disabled = true;
+    document.getElementById('epochiter').innerHTML = "None"
     document.getElementById("w0").value = '';
     document.getElementById("w1").value = '';
     document.getElementById("w2").value = '';
