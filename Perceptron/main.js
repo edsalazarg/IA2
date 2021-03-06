@@ -149,7 +149,7 @@ function get_coordinates(weights){
     let coordinates = []
     let slope = -(weights[0]/weights[2])/(weights[0]/weights[1])
     let intercept = -weights[0]/weights[2]
-    for (let i = -5; i<=5; i+=.1){
+    for (let i = -5; i<=5; i+=10){
         y1 = (slope*i) + intercept
 
         coordinates.push({
@@ -171,15 +171,17 @@ function predict(inputs, weights){
 }
 
 var all_coord = []
+var final_epoch = -1
+
 function train_weights(matrix,weights,epochs,l_rate){
     let prediction;
     let error;
     for (let epoch = 0; epoch < epochs; epoch++) {
-        console.log("Epoch " + (epoch+1));
-        console.log(weights)
+
+        var accuracy = 0
         for (let i = 0; i < matrix.length; i++) {
             prediction = predict(matrix[i], weights);
-            checked_pred = prediction === matrix[i][3]
+            checked_pred = prediction === matrix[i][3];
 
             if (checked_pred === false){
                 if (prediction === 1){
@@ -193,13 +195,22 @@ function train_weights(matrix,weights,epochs,l_rate){
                     weights[j] = weights[j] + (l_rate * error * matrix[i][j]);
                 }
             }else{
+                accuracy++;
                 if (prediction === 1)
                     confussion_matriz[3]++
                 else
                     confussion_matriz[0]++
             }
         }
-        all_coord.push(get_coordinates(weights))
+        console.log("Epoch " + (epoch+1));
+        console.log(weights)
+        console.log( "matrix" + matrix.length)
+        console.log( "accuracy" + accuracy)
+        all_coord.push(get_coordinates(weights));
+        if (accuracy === data.length){
+            final_epoch = epoch;
+            break;
+        }
     }
     return weights;
 }
@@ -210,7 +221,7 @@ $( "#train" ).click(function() {
     else{
         train();
         trained = true;
-        setTimeout (function() { dibujarLinea(0); }, 200);
+        setTimeout (function() { dibujarLinea(0); }, 1000);
     }
 });
 
@@ -242,14 +253,26 @@ function train(){
 function restart(){
     document.getElementById('initialize').disabled = false;
     document.getElementById('restart').disabled = true;
-    document.getElementById('epochiter').innerHTML = "None"
+    document.getElementById('epochiter').value = ""
+    document.getElementById('epochtotal').value = ""
     document.getElementById("w0").value = '';
     document.getElementById("w1").value = '';
     document.getElementById("w2").value = '';
+    document.getElementById("zerozero").innerHTML = '';
+    document.getElementById("zeroone").innerHTML = '';
+    document.getElementById("onezero").innerHTML = '';
+    document.getElementById("oneone").innerHTML = '';
+    document.getElementById("total").innerHTML = '';
+    document.getElementById("actualno").innerHTML = '';
+    document.getElementById("actualyes").innerHTML = '';
+    document.getElementById("predno").innerHTML = '';
+    document.getElementById("predyes").innerHTML = '';
+    confussion_matriz = [0,0,0,0]
     data = []
     $("#tablaAzules tr").remove();
     $("#tablaRojos tr").remove();
     $("#tablaPrueba tr").remove();
+    final_epoch = -1
     myChart.data.datasets[0].data = []
     myChart.data.datasets[1].data = []
     myChart.data.datasets[2].data = []
@@ -259,22 +282,37 @@ function restart(){
     trained = false
 }
 
+function mostrar_confusion_matriz(){
+    document.getElementById("zerozero").innerHTML = confussion_matriz[0];
+    document.getElementById("zeroone").innerHTML = confussion_matriz[1];
+    document.getElementById("onezero").innerHTML = confussion_matriz[2];
+    document.getElementById("oneone").innerHTML = confussion_matriz[3];
+    document.getElementById("total").innerHTML = confussion_matriz[0] + confussion_matriz[1] + confussion_matriz[2] + confussion_matriz[3];
+    document.getElementById("actualno").innerHTML = confussion_matriz[0] + confussion_matriz[1];
+    document.getElementById("actualyes").innerHTML = confussion_matriz[2] + confussion_matriz[3];
+    document.getElementById("predno").innerHTML = confussion_matriz[0] + confussion_matriz[2];
+    document.getElementById("predyes").innerHTML = confussion_matriz[1] + confussion_matriz[3];
+}
+
 function dibujarLinea(iter){
-    document.getElementById("epochiter").innerHTML = iter+1;
+    document.getElementById("epochiter").value = iter+1;
     myChart.data.datasets[2].data = all_coord[iter];
     myChart.update();
-    if (iter<(parseInt(document.getElementById("epochNumber").value)-1))
-        setTimeout (function() { dibujarLinea(iter+1); }, 200);
-    else{
-        document.getElementById('restart').disabled = false;
-        document.getElementById("zerozero").innerHTML = confussion_matriz[0];
-        document.getElementById("zeroone").innerHTML = confussion_matriz[1];
-        document.getElementById("onezero").innerHTML = confussion_matriz[2];
-        document.getElementById("oneone").innerHTML = confussion_matriz[3];
-        document.getElementById("total").innerHTML = confussion_matriz[0] + confussion_matriz[1] + confussion_matriz[2] + confussion_matriz[3];
-        document.getElementById("actualno").innerHTML = confussion_matriz[0] + confussion_matriz[1];
-        document.getElementById("actualyes").innerHTML = confussion_matriz[2] + confussion_matriz[3];
-        document.getElementById("predno").innerHTML = confussion_matriz[0] + confussion_matriz[2];
-        document.getElementById("predyes").innerHTML = confussion_matriz[1] + confussion_matriz[3];
+    if (final_epoch !== -1){
+        if (iter<final_epoch)
+            setTimeout (function() { dibujarLinea(iter+1); }, 1000);
+        else{
+            document.getElementById("epochtotal").value = (final_epoch+1);
+            document.getElementById('restart').disabled = false;
+            mostrar_confusion_matriz();
+        }
+    }else{
+        if (iter<(parseInt(document.getElementById("epochNumber").value)-1))
+            setTimeout (function() { dibujarLinea(iter+1); }, 1000);
+        else{
+            alert("El perceptron no pudo ser entrenado correctamente");
+            document.getElementById('restart').disabled = false;
+            mostrar_confusion_matriz();
+        }
     }
 }
