@@ -3,6 +3,7 @@ var trained = false
 var final_weights = []
 var data = []
 var confussion_matriz = [0,0,0,0]
+var all_confussion_matriz = []
 var ctx = document.getElementById('myChart');
 var myChart = new Chart(ctx, {
     type: 'scatter',
@@ -177,7 +178,7 @@ function train_weights(matrix,weights,epochs,l_rate){
     let prediction;
     let error;
     for (let epoch = 0; epoch < epochs; epoch++) {
-
+        confussion_matriz = [0,0,0,0]
         var accuracy = 0
         for (let i = 0; i < matrix.length; i++) {
             prediction = predict(matrix[i], weights);
@@ -202,11 +203,8 @@ function train_weights(matrix,weights,epochs,l_rate){
                     confussion_matriz[0]++
             }
         }
-        console.log("Epoch " + (epoch+1));
-        console.log(weights)
-        console.log( "matrix" + matrix.length)
-        console.log( "accuracy" + accuracy)
         all_coord.push(get_coordinates(weights));
+        all_confussion_matriz.push(confussion_matriz)
         if (accuracy === data.length){
             final_epoch = epoch;
             break;
@@ -282,37 +280,42 @@ function restart(){
     trained = false
 }
 
-function mostrar_confusion_matriz(){
-    document.getElementById("zerozero").innerHTML = confussion_matriz[0];
-    document.getElementById("zeroone").innerHTML = confussion_matriz[1];
-    document.getElementById("onezero").innerHTML = confussion_matriz[2];
-    document.getElementById("oneone").innerHTML = confussion_matriz[3];
-    document.getElementById("total").innerHTML = confussion_matriz[0] + confussion_matriz[1] + confussion_matriz[2] + confussion_matriz[3];
-    document.getElementById("actualno").innerHTML = confussion_matriz[0] + confussion_matriz[1];
-    document.getElementById("actualyes").innerHTML = confussion_matriz[2] + confussion_matriz[3];
-    document.getElementById("predno").innerHTML = confussion_matriz[0] + confussion_matriz[2];
-    document.getElementById("predyes").innerHTML = confussion_matriz[1] + confussion_matriz[3];
+function mostrar_confusion_matriz(matriz_epoch){
+    document.getElementById("zerozero").innerHTML = matriz_epoch[0];
+    document.getElementById("zeroone").innerHTML = matriz_epoch[1];
+    document.getElementById("onezero").innerHTML = matriz_epoch[2];
+    document.getElementById("oneone").innerHTML = matriz_epoch[3];
+    document.getElementById("total").innerHTML = matriz_epoch[0] + matriz_epoch[1] + matriz_epoch[2] + matriz_epoch[3];
+    document.getElementById("actualno").innerHTML = matriz_epoch[0] + matriz_epoch[1];
+    document.getElementById("actualyes").innerHTML = matriz_epoch[2] + matriz_epoch[3];
+    document.getElementById("predno").innerHTML = matriz_epoch[0] + matriz_epoch[2];
+    document.getElementById("predyes").innerHTML = matriz_epoch[1] + matriz_epoch[3];
 }
 
 function dibujarLinea(iter){
     document.getElementById("epochiter").value = iter+1;
     myChart.data.datasets[2].data = all_coord[iter];
     myChart.update();
+    mostrar_confusion_matriz(all_confussion_matriz[iter]);
     if (final_epoch !== -1){
-        if (iter<final_epoch)
-            setTimeout (function() { dibujarLinea(iter+1); }, 1000);
+        if (iter<final_epoch){
+          setTimeout (function() { dibujarLinea(iter+1); }, 1000);
+          mostrar_confusion_matriz(all_confussion_matriz[iter+1])
+        }
         else{
             document.getElementById("epochtotal").value = (final_epoch+1);
             document.getElementById('restart').disabled = false;
-            mostrar_confusion_matriz();
+
         }
     }else{
-        if (iter<(parseInt(document.getElementById("epochNumber").value)-1))
-            setTimeout (function() { dibujarLinea(iter+1); }, 1000);
+        if (iter<(parseInt(document.getElementById("epochNumber").value)-1)){
+          setTimeout (function() { dibujarLinea(iter+1); }, 1000);
+          mostrar_confusion_matriz(all_confussion_matriz[iter+1])
+        }
         else{
             alert("El perceptron no pudo ser entrenado correctamente");
             document.getElementById('restart').disabled = false;
-            mostrar_confusion_matriz();
+
         }
     }
 }
