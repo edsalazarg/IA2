@@ -3,6 +3,7 @@ var trained = false
 var final_weights = []
 var data = []
 var confussion_matriz = [0,0,0,0]
+var all_confussion_matriz = []
 var ctx = document.getElementById('myChart');
 var myChart = new Chart(ctx, {
     type: 'scatter',
@@ -177,7 +178,7 @@ function train_weights(matrix,weights,epochs,l_rate){
     let prediction;
     let error;
     for (let epoch = 0; epoch < epochs; epoch++) {
-
+        confussion_matriz = [0,0,0,0]
         var accuracy = 0
         for (let i = 0; i < matrix.length; i++) {
             prediction = predict(matrix[i], weights);
@@ -202,11 +203,8 @@ function train_weights(matrix,weights,epochs,l_rate){
                     confussion_matriz[0]++
             }
         }
-        console.log("Epoch " + (epoch+1));
-        console.log(weights)
-        console.log( "matrix" + matrix.length)
-        console.log( "accuracy" + accuracy)
         all_coord.push(get_coordinates(weights));
+        all_confussion_matriz.push(confussion_matriz)
         if (accuracy === data.length){
             final_epoch = epoch;
             break;
@@ -224,6 +222,68 @@ $( "#train" ).click(function() {
         setTimeout (function() { dibujarLinea(0); }, 1000);
     }
 });
+
+$( "#adeline" ).click(function() {
+    if (data.length === 0)
+        alert("Empty Data")
+    else{
+        adeline();
+        trained = true;
+        setTimeout (function() { dibujarLinea(0); }, 1000);
+    }
+});
+
+function adeline(){
+    document.getElementById('train').disabled = true;
+    document.getElementById('initialize').disabled = true;
+    let w0 = parseFloat(document.getElementById("w0").value);
+    let w1 = parseFloat(document.getElementById("w1").value);
+    let w2 = parseFloat(document.getElementById("w2").value);
+    let epochs = parseInt(document.getElementById("epochNumber").value);
+    let l_rate =  parseFloat(document.getElementById("learningRate").value);
+    let desiredError =  parseFloat(document.getElementById("desiredError").value);
+    let weights = [w0, w1, w2];
+    if (isNaN(desiredError)) {
+      alert("Invalid value for Desired error")
+      return
+    }
+    console.log(data)
+    final_weights = train_adeline(data,weights,epochs,l_rate,desiredError)
+}
+
+function train_adeline(matrix,weights,epochs,l_rate, desiredError){
+    let error_acumulado;
+    for (let epoch = 0; epoch < epochs; epoch++) {
+        error_acumulado = 0;
+        //Iterar los patrones
+        for (let i = 0; i < matrix.length; i++) {
+            let x = matrix[i];
+            let desired_val = x[3];
+            f_wx = sigmoide(x, weights);
+            error = desired_val - f_wx;
+            error_acumulado += (error * error)/2;
+            for (let j = 0; j < weights.length; j++){
+                weights[j] = weights[j] + l_rate * error * (f_wx * (1 - f_wx)) * x[j];
+            }
+        }
+        all_coord.push(get_coordinates(weights));
+
+        if (error_acumulado <= desiredError){
+            final_epoch = epoch;
+            break;
+        }
+    }
+    return weights;
+}
+
+function sigmoide(inputs, weights){
+  y = 0;
+  for (let index = 0; index < 3; index++){
+      y += inputs[index] * weights[index];
+  }
+  y = y * -1;
+  return 1/(1 + Math.pow(Math.E, y));
+}
 
 function initialize(){
     document.getElementById("w0").value = (Math.random() * .5  * (Math.round(Math.random()) ? 1 : -1)).toFixed(2);
@@ -282,37 +342,42 @@ function restart(){
     trained = false
 }
 
-function mostrar_confusion_matriz(){
-    document.getElementById("zerozero").innerHTML = confussion_matriz[0];
-    document.getElementById("zeroone").innerHTML = confussion_matriz[1];
-    document.getElementById("onezero").innerHTML = confussion_matriz[2];
-    document.getElementById("oneone").innerHTML = confussion_matriz[3];
-    document.getElementById("total").innerHTML = confussion_matriz[0] + confussion_matriz[1] + confussion_matriz[2] + confussion_matriz[3];
-    document.getElementById("actualno").innerHTML = confussion_matriz[0] + confussion_matriz[1];
-    document.getElementById("actualyes").innerHTML = confussion_matriz[2] + confussion_matriz[3];
-    document.getElementById("predno").innerHTML = confussion_matriz[0] + confussion_matriz[2];
-    document.getElementById("predyes").innerHTML = confussion_matriz[1] + confussion_matriz[3];
+function mostrar_confusion_matriz(matriz_epoch){
+    document.getElementById("zerozero").innerHTML = matriz_epoch[0];
+    document.getElementById("zeroone").innerHTML = matriz_epoch[1];
+    document.getElementById("onezero").innerHTML = matriz_epoch[2];
+    document.getElementById("oneone").innerHTML = matriz_epoch[3];
+    document.getElementById("total").innerHTML = matriz_epoch[0] + matriz_epoch[1] + matriz_epoch[2] + matriz_epoch[3];
+    document.getElementById("actualno").innerHTML = matriz_epoch[0] + matriz_epoch[1];
+    document.getElementById("actualyes").innerHTML = matriz_epoch[2] + matriz_epoch[3];
+    document.getElementById("predno").innerHTML = matriz_epoch[0] + matriz_epoch[2];
+    document.getElementById("predyes").innerHTML = matriz_epoch[1] + matriz_epoch[3];
 }
 
 function dibujarLinea(iter){
     document.getElementById("epochiter").value = iter+1;
     myChart.data.datasets[2].data = all_coord[iter];
     myChart.update();
+    //mostrar_confusion_matriz(all_confussion_matriz[iter]);
     if (final_epoch !== -1){
-        if (iter<final_epoch)
-            setTimeout (function() { dibujarLinea(iter+1); }, 1000);
+        if (iter<final_epoch){
+          setTimeout (function() { dibujarLinea(iter+1); }, 500);
+          //mostrar_confusion_matriz(all_confussion_matriz[iter+1])
+        }
         else{
             document.getElementById("epochtotal").value = (final_epoch+1);
             document.getElementById('restart').disabled = false;
-            mostrar_confusion_matriz();
+
         }
     }else{
-        if (iter<(parseInt(document.getElementById("epochNumber").value)-1))
-            setTimeout (function() { dibujarLinea(iter+1); }, 1000);
+        if (iter<(parseInt(document.getElementById("epochNumber").value)-1)){
+          setTimeout (function() { dibujarLinea(iter+1); }, 500);
+          //mostrar_confusion_matriz(all_confussion_matriz[iter+1])
+        }
         else{
             alert("El perceptron no pudo ser entrenado correctamente");
             document.getElementById('restart').disabled = false;
-            mostrar_confusion_matriz();
+
         }
     }
 }

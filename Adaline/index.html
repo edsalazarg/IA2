@@ -24,7 +24,8 @@
                     <canvas id="myChart" oncontextmenu="return false"></canvas>
                     <div class="">
                         <button class="btn btn-primary" id="initialize" onclick="initialize()">Inicializa</button>
-                        <button class="btn btn-primary" disabled id="train">Entrenamiento</button>
+                        <button class="btn btn-primary" disabled id="train">Perceptron</button>
+                        <button class="btn btn-primary" id="adeline">Adeline</button>
                         <button class="btn btn-primary" id="restart" disabled onclick="restart()">Reiniciar</button>
                     </div>
                     <div>
@@ -81,7 +82,7 @@
                     <label for="learningRate" class="form-label">Learning rate</label>
                     <div class="input-group mb-3">
                         <span class="input-group-text">&eta;</span>
-                        <input type="text" class="form-control " id="learningRate" value="0.4">
+                        <input type="text" class="form-control " id="learningRate" value="0.1">
                     </div>
                     <label for="epochNumber" class="form-label">Epoch number</label>
                     <div class="input-group mb-3">
@@ -114,7 +115,7 @@
                     </table>
                 </div>
                 <div class="col-3 col-sm-2 mt-3">
-                    <h6>Pesos</h6>
+                    <h6>Weights</h6>
                     <div class="input-group mb-3">
                         <span class="input-group-text">w0</span>
                         <input type="text" class="form-control " disabled id="w0">
@@ -126,6 +127,10 @@
                     <div class="input-group mb-3">
                         <span class="input-group-text">w2</span>
                         <input type="text" class="form-control " disabled id="w2">
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Desired error</span>
+                        <input type="text" class="form-control " id="desiredError" value="0.1">
                     </div>
                     <div class="input-group mb-3">
                         <span class="input-group-text">Epoch Actual</span>
