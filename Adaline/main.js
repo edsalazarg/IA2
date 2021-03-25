@@ -32,7 +32,7 @@ Chart.pluginService.register({
             ctx.fillRect(chartArea.left, chartArea.bottom, chartArea.right - chartArea.left, chartArea.bottom - chartArea.top);
 
             ctx.fillStyle = 'rgba(255,255,255)';
-            ctx.fillRect(0,0 , 1000,32);
+            ctx.fillRect(0,0 , 1500,32);
             ctx.restore();
         }
     }
@@ -41,12 +41,14 @@ Chart.pluginService.register({
 var algoritmo = 0
 var all_error = []
 var all_coord = []
+var initial_weights = []
 var final_epoch = -1
 var trained = false
 var final_weights = []
 var data = []
 var upper = false
 var lower = false
+var adaline_success = false
 var ctx = document.getElementById('myChart');
 var myChart = new Chart(ctx, {
     type: 'scatter',
@@ -298,6 +300,12 @@ $( "#train" ).click(function() {
     if (data.length === 0)
         alert("Empty Data")
     else{
+        if(algoritmo === 2){
+            algoritmo = 1
+            light_restart()
+            myChart.data.datasets[2].data = get_coordinates(initial_weights);
+            myChart.update();
+        }
         train();
         algoritmo = 1
         trained = true;
@@ -309,8 +317,14 @@ $( "#adeline" ).click(function() {
     if (data.length === 0)
         alert("Empty Data")
     else{
-        adeline();
+        if(algoritmo === 1){
+            algoritmo = 2;
+            light_restart()
+            myChart.data.datasets[2].data = get_coordinates(initial_weights);
+            myChart.update();
+        }
         algoritmo = 2;
+        adeline();
         trained = true;
         setTimeout (function() { dibujarLinea(0); }, 1000);
     }
@@ -350,12 +364,13 @@ function train_adeline(matrix,weights,epochs,l_rate, desiredError){
             for (let j = 0; j < weights.length; j++){
                 weights[j] = weights[j] + l_rate * error * (f_wx * (1 - f_wx)) * x[j];
             }
-            slope_function(weights,matrix[i][1],matrix[i][2],matrix[i][3])
+            slope_function(final_weights,matrix[0][1],matrix[0][2],matrix[0][3])
         }
         all_coord.push(get_coordinates(weights));
         all_error.push(error_acumulado)
         if (error_acumulado <= desiredError){
             final_epoch = epoch;
+            adaline_success = true
             break;
         }else{
             final_epoch = epoch;
@@ -382,6 +397,7 @@ function initialize(){
     let w1 = parseFloat(document.getElementById("w1").value);
     let w2 = parseFloat(document.getElementById("w2").value);
     let weights = [w0, w1, w2];
+    initial_weights = weights
     document.getElementById('train').disabled = false;
     myChart.data.datasets[2].data = get_coordinates(weights);
     myChart.update();
@@ -397,6 +413,37 @@ function train(){
     let l_rate =  parseFloat(document.getElementById("learningRate").value);
     let weights = [w0, w1, w2];
     final_weights = train_weights(data,weights,epochs,l_rate)
+}
+
+function light_restart(){
+    document.getElementById('initialize').disabled = false;
+    if (algoritmo === 2)
+        document.getElementById('adeline').disabled = false;
+    else
+        document.getElementById('train').disabled = false;
+    document.getElementById('epochiter').value = ""
+    document.getElementById('epochtotal').value = ""
+    document.getElementById("zerozero").innerHTML = '';
+    document.getElementById("zeroone").innerHTML = '';
+    document.getElementById("onezero").innerHTML = '';
+    document.getElementById("oneone").innerHTML = '';
+    document.getElementById("total").innerHTML = '';
+    document.getElementById("actualno").innerHTML = '';
+    document.getElementById("actualyes").innerHTML = '';
+    document.getElementById("predno").innerHTML = '';
+    document.getElementById("predyes").innerHTML = '';
+    confussion_matriz = [0,0,0,0]
+    myChart.config.final = false;
+    $("#tablaAzules tr").remove();
+    $("#tablaRojos tr").remove();
+    final_epoch = -1
+    myChart.update()
+    errorChart.data.labels = []
+    errorChart.data.datasets[0].data = []
+    errorChart.update()
+    all_coord = []
+    all_error = []
+    trained = false
 }
 
 function restart(){
@@ -419,6 +466,7 @@ function restart(){
     confussion_matriz = [0,0,0,0]
     myChart.config.final = false;
     data = []
+    adaline_success = false
     $("#tablaAzules tr").remove();
     $("#tablaRojos tr").remove();
     $("#tablaPrueba tr").remove();
@@ -479,9 +527,13 @@ function dibujarLinea(iter){
             mostrar_confusion_matriz()
             myChart.config.final = true
             if (algoritmo === 2){
+
                 errorChart.data.labels = range(0,final_epoch+1)
                 errorChart.data.datasets[0].data = all_error
                 errorChart.update()
+                if(adaline_success === false){
+                    alert("El error acumulado no llego a ser menor que el deseado");
+                }
             }
         }
     }else{
