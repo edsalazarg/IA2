@@ -364,7 +364,7 @@ function train_adeline(matrix,weights,epochs,l_rate, desiredError){
             for (let j = 0; j < weights.length; j++){
                 weights[j] = weights[j] + l_rate * error * (f_wx * (1 - f_wx)) * x[j];
             }
-            slope_function(final_weights,matrix[0][1],matrix[0][2],matrix[0][3])
+            slope_function(weights,matrix[i][1],matrix[i][2],matrix[i][3])
         }
         all_coord.push(get_coordinates(weights));
         all_error.push(error_acumulado)
