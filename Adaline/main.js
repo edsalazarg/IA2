@@ -364,7 +364,6 @@ function train_adeline(matrix,weights,epochs,l_rate, desiredError){
             for (let j = 0; j < weights.length; j++){
                 weights[j] = weights[j] + l_rate * error * (f_wx * (1 - f_wx)) * x[j];
             }
-            slope_function(weights,matrix[i][1],matrix[i][2],matrix[i][3])
         }
         all_coord.push(get_coordinates(weights));
         all_error.push(error_acumulado)
@@ -376,7 +375,6 @@ function train_adeline(matrix,weights,epochs,l_rate, desiredError){
             final_epoch = epoch;
         }
     }
-    console.log(all_error)
     return weights;
 }
 
@@ -525,15 +523,18 @@ function dibujarLinea(iter){
             document.getElementById("epochtotal").value = (final_epoch+1);
             document.getElementById('restart').disabled = false;
             mostrar_confusion_matriz()
-            myChart.config.final = true
             if (algoritmo === 2){
-
                 errorChart.data.labels = range(0,final_epoch+1)
                 errorChart.data.datasets[0].data = all_error
                 errorChart.update()
                 if(adaline_success === false){
                     alert("El error acumulado no llego a ser menor que el deseado");
+                }else{
+                    slope_function(final_weights,data[0][1],data[0][2],data[0][3])
+                    myChart.config.final = true
                 }
+            }else{
+                myChart.config.final = true
             }
         }
     }else{
