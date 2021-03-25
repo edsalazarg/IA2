@@ -15,7 +15,7 @@
 <body>
 <div class="col-lg-12" style="padding-top: 20px">
     <div class="card mx-2">
-        <div class="card-header">
+        <div id="algoritmo" class="card-header">
             Perceptron
         </div>
         <div class="card-body">
@@ -29,51 +29,8 @@
                         <button class="btn btn-primary" id="restart" disabled onclick="restart()">Reiniciar</button>
                     </div>
                     <div>
-                        <div class="col-lg-4">
-                            <h6>Datos de Prueba</h6>
-                            <table id="tablaPrueba" class="table table-sm table-bordered">
-                                <thead>
-                                <tr>
-                                    <th style="width: 40%">X</th>
-                                    <th style="width: 40%">Y</th>
-                                    <th style="width: 20%">Prediccion</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-
-                                </tbody>
-                            </table>
-                            <h6>Matriz de Confusion</h6>
-                            <table id="confussion" class="table table-sm table-bordered">
-                                <thead>
-                                <tr>
-                                    <th id="total"></th>
-                                    <th>Predicted 0</th>
-                                    <th>Predicted 1</th>
-                                    <th></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <td>Actual 0</td>
-                                    <td id="zerozero"></td>
-                                    <td id="zeroone"></td>
-                                    <td id="actualno"></td>
-                                </tr>
-                                <tr>
-                                    <td>Actual 1</td>
-                                    <td id="onezero"></td>
-                                    <td id="oneone"></td>
-                                    <td id="actualyes"></td>
-                                </tr>
-                                <tr>
-                                    <td></td>
-                                    <td id="predno"></td>
-                                    <td id="predyes"></td>
-                                    <td></td>
-                                </tr>
-                                </tbody>
-                            </table>
+                        <div>
+                            <canvas id="errorChart" oncontextmenu="return false"></canvas>
                         </div>
                     </div>
 
@@ -113,6 +70,39 @@
 
                         </tbody>
                     </table>
+                    <div>
+                        <h6>Matriz de Confusion</h6>
+                        <table id="confussion" class="table table-sm table-bordered">
+                            <thead>
+                            <tr>
+                                <th id="total"></th>
+                                <th>Predicted 0</th>
+                                <th>Predicted 1</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>Actual 0</td>
+                                <td id="zerozero"></td>
+                                <td id="zeroone"></td>
+                                <td id="actualno"></td>
+                            </tr>
+                            <tr>
+                                <td>Actual 1</td>
+                                <td id="onezero"></td>
+                                <td id="oneone"></td>
+                                <td id="actualyes"></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td id="predno"></td>
+                                <td id="predyes"></td>
+                                <td></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <div class="col-3 col-sm-2 mt-3">
                     <h6>Weights</h6>
@@ -140,7 +130,22 @@
                         <span class="input-group-text">Total Epoch</span>
                         <input type="text" class="form-control " disabled id="epochtotal">
                     </div>
+                    <h6>Datos de Prueba</h6>
+                    <table id="tablaPrueba" class="table table-sm table-bordered">
+                        <thead>
+                        <tr>
+                            <th style="width: 40%">X</th>
+                            <th style="width: 40%">Y</th>
+                            <th style="width: 20%">Prediccion</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+
                 </div>
+
             </div>
 
         </div>

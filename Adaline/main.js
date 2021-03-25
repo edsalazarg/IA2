@@ -1,7 +1,52 @@
+Chart.pluginService.register({
+    beforeDraw: function (chart, easing) {
+        if (chart.config.final){
+            var ctx = chart.chart.ctx;
+            var chartArea = chart.chartArea;
+            ex1 = chart.data.datasets[0].data[0].x
+            ey1 = chart.data.datasets[0].data[0].y
+            x1 = chart.getDatasetMeta(2).data[0]._model.x
+            y1 = chart.getDatasetMeta(2).data[0]._model.y
+            x2 = chart.getDatasetMeta(2).data[1]._model.x
+            y2 = chart.getDatasetMeta(2).data[1]._model.y
+            ctx.save();
 
+            let region = new Path2D();
+            region.moveTo(x1, y1);
+            region.lineTo(chartArea.left, chartArea.bottom);
+            region.lineTo(chartArea.right, chartArea.bottom);
+            region.lineTo(x2, y2);
+            region.closePath();
+            ctx.fillStyle = lower;
+            ctx.fill(region);
+            region = new Path2D();
+            region.moveTo(x1, y1);
+            region.lineTo(chartArea.left, chartArea.top);
+            region.lineTo(chartArea.right, chartArea.top);
+            region.lineTo(x2, y2);
+            region.closePath();
+            ctx.fillStyle = upper;
+            ctx.fill(region);
+
+            ctx.fillStyle = 'rgba(255,255,255)';
+            ctx.fillRect(chartArea.left, chartArea.bottom, chartArea.right - chartArea.left, chartArea.bottom - chartArea.top);
+
+            ctx.fillStyle = 'rgba(255,255,255)';
+            ctx.fillRect(0,0 , 1000,32);
+            ctx.restore();
+        }
+    }
+});
+
+var algoritmo = 0
+var all_error = []
+var all_coord = []
+var final_epoch = -1
 var trained = false
 var final_weights = []
 var data = []
+var upper = false
+var lower = false
 var confussion_matriz = [0,0,0,0]
 var all_confussion_matriz = []
 var ctx = document.getElementById('myChart');
@@ -34,6 +79,7 @@ var myChart = new Chart(ctx, {
         ]
     },
     options: {
+        final: false,
         scales: {
             xAxes: [{
                 type: "linear",
@@ -62,7 +108,66 @@ var myChart = new Chart(ctx, {
     }
 });
 
+var ctx2 = document.getElementById('errorChart');
+var errorChart = new Chart(ctx2, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [
+            {
+                data: [],
+                borderColor: '#af90ca',
+                backgroundColor: '#af90ca',
+                fill: true,
+                label: 'Error line',
+                lineTension: 0
+            }
+        ]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        }
+    }
+});
+// var errorChart = new Chart(ctx2, {
+//     type: 'line',
+//     data: {
+//         datasets: [{
+//             label: 'Error Line',
+//             data: [],
+//             showLine: true,
+//             fill: true,
+//             backgroundColor: '#fff200',
+//             borderColor: '#fff200',
+//         }]
+//     },
+// });
+
 document.getElementById('myChart').onmousedown = FuncOnClick;
+
+function slope_function(weights,x,y,true_value){
+    let slope = -(weights[0]/weights[2])/(weights[0]/weights[1])
+    let intercept = -weights[0]/weights[2]
+    y1 = (slope*x) + intercept
+    if(y > y1){
+        if(true_value){
+            upper = 'rgb(0,64,255,0.2)'
+        }else{
+            upper = 'rgb(255,0,0,0.2)'
+        }
+    }else{
+        if(true_value){
+            lower = 'rgb(0,64,255,0.2)'
+        }else{
+            lower = 'rgb(255,0,0,0.2)'
+        }
+    }
+}
 
 function FuncOnClick(event) {
     let scaleRef,
@@ -171,13 +276,14 @@ function predict(inputs, weights){
     return (total_activation > threshold) ? 1 : 0;
 }
 
-var all_coord = []
-var final_epoch = -1
-
 function train_weights(matrix,weights,epochs,l_rate){
+    document.getElementById("algoritmo").innerHTML = "Perceptron"
     let prediction;
     let error;
     for (let epoch = 0; epoch < epochs; epoch++) {
+        document.getElementById("w0").value = weights[0]
+        document.getElementById("w1").value = weights[1]
+        document.getElementById("w2").value = weights[2]
         confussion_matriz = [0,0,0,0]
         var accuracy = 0
         for (let i = 0; i < matrix.length; i++) {
@@ -196,6 +302,7 @@ function train_weights(matrix,weights,epochs,l_rate){
                     weights[j] = weights[j] + (l_rate * error * matrix[i][j]);
                 }
             }else{
+                slope_function(weights,matrix[i][1],matrix[i][2],matrix[i][3])
                 accuracy++;
                 if (prediction === 1)
                     confussion_matriz[3]++
@@ -218,6 +325,7 @@ $( "#train" ).click(function() {
         alert("Empty Data")
     else{
         train();
+        algoritmo = 1
         trained = true;
         setTimeout (function() { dibujarLinea(0); }, 1000);
     }
@@ -228,6 +336,7 @@ $( "#adeline" ).click(function() {
         alert("Empty Data")
     else{
         adeline();
+        algoritmo = 2;
         trained = true;
         setTimeout (function() { dibujarLinea(0); }, 1000);
     }
@@ -247,13 +356,14 @@ function adeline(){
       alert("Invalid value for Desired error")
       return
     }
-    console.log(data)
     final_weights = train_adeline(data,weights,epochs,l_rate,desiredError)
 }
 
 function train_adeline(matrix,weights,epochs,l_rate, desiredError){
+    document.getElementById("algoritmo").innerHTML = "Adaline"
     let error_acumulado;
     for (let epoch = 0; epoch < epochs; epoch++) {
+
         error_acumulado = 0;
         //Iterar los patrones
         for (let i = 0; i < matrix.length; i++) {
@@ -262,17 +372,20 @@ function train_adeline(matrix,weights,epochs,l_rate, desiredError){
             f_wx = sigmoide(x, weights);
             error = desired_val - f_wx;
             error_acumulado += (error * error)/2;
+
             for (let j = 0; j < weights.length; j++){
                 weights[j] = weights[j] + l_rate * error * (f_wx * (1 - f_wx)) * x[j];
             }
+            slope_function(weights,matrix[i][1],matrix[i][2],matrix[i][3])
         }
         all_coord.push(get_coordinates(weights));
-
+        all_error.push(error_acumulado)
         if (error_acumulado <= desiredError){
             final_epoch = epoch;
             break;
         }
     }
+    console.log(all_error)
     return weights;
 }
 
@@ -328,6 +441,7 @@ function restart(){
     document.getElementById("predno").innerHTML = '';
     document.getElementById("predyes").innerHTML = '';
     confussion_matriz = [0,0,0,0]
+    myChart.config.final = false;
     data = []
     $("#tablaAzules tr").remove();
     $("#tablaRojos tr").remove();
@@ -339,6 +453,7 @@ function restart(){
     myChart.data.datasets[3].data = []
     myChart.update()
     all_coord = []
+    all_error = []
     trained = false
 }
 
@@ -358,26 +473,49 @@ function dibujarLinea(iter){
     document.getElementById("epochiter").value = iter+1;
     myChart.data.datasets[2].data = all_coord[iter];
     myChart.update();
-    //mostrar_confusion_matriz(all_confussion_matriz[iter]);
     if (final_epoch !== -1){
         if (iter<final_epoch){
-          setTimeout (function() { dibujarLinea(iter+1); }, 500);
-          //mostrar_confusion_matriz(all_confussion_matriz[iter+1])
+          setTimeout (function() { dibujarLinea(iter+1); }, 150);
         }
         else{
             document.getElementById("epochtotal").value = (final_epoch+1);
             document.getElementById('restart').disabled = false;
-
+            myChart.config.final = true
+            if (algoritmo === 2){
+                errorChart.data.labels = range(0,final_epoch+1)
+                errorChart.data.datasets[0].data = all_error
+                errorChart.update()
+            }
         }
     }else{
         if (iter<(parseInt(document.getElementById("epochNumber").value)-1)){
-          setTimeout (function() { dibujarLinea(iter+1); }, 500);
-          //mostrar_confusion_matriz(all_confussion_matriz[iter+1])
+          setTimeout (function() { dibujarLinea(iter+1); }, 150);
         }
         else{
             alert("El perceptron no pudo ser entrenado correctamente");
             document.getElementById('restart').disabled = false;
-
+            myChart.config.final = true
+            if (algoritmo === 2){
+                errorChart.data.labels = range(0,final_epoch+1)
+                errorChart.data.datasets[0].data = all_error
+                errorChart.update()
+            }
         }
     }
 }
+
+function range(start, stop, step){
+    if (typeof stop=='undefined'){
+        // one param defined
+        stop = start;
+        start = 0;
+    };
+    if (typeof step=='undefined'){
+        step = 1;
+    };
+    var result = [];
+    for (var i=start; step>0 ? i<stop : i>stop; i+=step){
+        result.push(i);
+    };
+    return result;
+};
