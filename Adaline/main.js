@@ -383,6 +383,8 @@ function train_adeline(matrix,weights,epochs,l_rate, desiredError){
         if (error_acumulado <= desiredError){
             final_epoch = epoch;
             break;
+        }else{
+            final_epoch = epoch;
         }
     }
     console.log(all_error)
@@ -452,6 +454,9 @@ function restart(){
     myChart.data.datasets[2].data = []
     myChart.data.datasets[3].data = []
     myChart.update()
+    errorChart.data.labels = []
+    errorChart.data.datasets[0].data = []
+    errorChart.update()
     all_coord = []
     all_error = []
     trained = false
