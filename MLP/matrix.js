@@ -43,6 +43,16 @@ class Matrix {
         return arr;
     }
 
+    average() {
+        let average = 0;
+        for (let i = 0; i < this.rows; i++) {
+            for (let j = 0; j < this.cols; j++) {
+                average = average + (this.data[i][j] * this.data[i][j]);
+            }
+        }
+        return average
+    }
+
     randomize() {
         return this.map(e => Math.random() * 2 - 1);
     }

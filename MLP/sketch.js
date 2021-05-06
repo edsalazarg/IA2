@@ -1,28 +1,36 @@
 let training_data = [{
         inputs: [0, 0],
-        outputs: [0,1]
+        outputs: [0]
     },
     {
         inputs: [0, 1],
-        outputs: [1,1]
+        outputs: [1]
     },
     {
         inputs: [1, 0],
-        outputs: [1,0]
+        outputs: [1]
     },
     {
         inputs: [1, 1],
-        outputs: [0,0]
+        outputs: [0]
     }
 ];
 
-function setup(){
-    let nn = new NeuralNetwork(2,2,2, );
+let nn;
 
-    // let output = nn.feedforward(input);
-    for (let i = 0; i < 1; i++){
-        for(data of training_data){
-            nn.train(data.inputs,data.outputs);
+function setup(){
+    // nn = new NeuralNetwork(2,4,1, 0.1,0.001,true);
+    nn = new NeuralNetwork(2,4,1, 0.1,0.001);
+    // let data = random(training_data);
+    // nn.train(data.inputs,data.outputs);
+    for (let i = 0; i < 10000; i++){
+        let finish = false;
+        for (const data in training_data) {
+            finish = nn.train(training_data[data].inputs,training_data[data].outputs)
+        }
+        if(finish){
+            console.log(i);
+            break;
         }
     }
 
@@ -34,5 +42,6 @@ function setup(){
 }
 
 function draw() {
+
 
 }
