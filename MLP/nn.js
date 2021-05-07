@@ -89,13 +89,17 @@ class NeuralNetwork{
         }
     }
 
-    calculate_error(a){
+    calculate_error(a,current_iter){
         let average = a.average();
-        this.all_errors.push(average);
+        if (average < this.desired_error)
+            this.all_errors.push(average);
+        else if (current_iter % 20 === 0){
+            this.all_errors.push(average);
+        }
         return average < this.desired_error;
     }
 
-    train(input_array, target_array){
+    train(input_array, target_array,current_iter){
         if (this.hl2 === false){
             // FEEDFORWARD
             // Generating the Hidden Outputs
@@ -116,8 +120,7 @@ class NeuralNetwork{
             // Calculate the error
             // ERROR = TARGETS - OUTPUTS
             let output_errors = Matrix.subtract(targets, outputs);
-
-            if (this.calculate_error(output_errors)){
+            if (this.calculate_error(output_errors,current_iter)){
                 return true;
             }
 
@@ -178,7 +181,7 @@ class NeuralNetwork{
             // ERROR = TARGETS - OUTPUTS
             let output_errors = Matrix.subtract(targets, outputs);
 
-            if (this.calculate_error(output_errors)){
+            if (this.calculate_error(output_errors, current_iter)){
                 return true;
             }
 

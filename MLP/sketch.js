@@ -129,11 +129,11 @@ function train(){
     for (let i = 0; i < max_epochs; i++){
         let finish = false;
         for (const data in training_data) {
-            finish = nn.train(training_data[data].inputs,training_data[data].outputs)
+            finish = nn.train(training_data[data].inputs,training_data[data].outputs, i)
         }
         if(finish){
             document.getElementById("epochtotal").value = i;
-            errorChart.data.labels = range(0,i)
+            errorChart.data.labels = range(0,i+1,20)
             errorChart.data.datasets[0].data = nn.all_errors;
             errorChart.update()
             break;
