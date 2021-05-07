@@ -8,10 +8,11 @@ function dsigmoid(y){
 }
 
 class NeuralNetwork{
-    constructor(numI, numH, numO,learning_rate = 0.1,desired_error = 0.1, hl2 = false) {
+    constructor(numI, numH, numO,learning_rate,desired_error, hl2) {
         this.hl2 = hl2;
         this.learning_rate = learning_rate;
         this.desired_error = desired_error;
+        this.all_errors = [];
 
         if(this.hl2 === false){
             this.input_nodes = numI;
@@ -89,8 +90,9 @@ class NeuralNetwork{
     }
 
     calculate_error(a){
-        // console.log(a.average());
-        return a.average() < this.desired_error;
+        let average = a.average();
+        this.all_errors.push(average);
+        return average < this.desired_error;
     }
 
     train(input_array, target_array){
