@@ -61,8 +61,10 @@ function initialize_gradient(){
         z: z,
         x: x,
         y: y,
+        // type: 'heatmap',
         type: 'contour',
-        colorscale: [[0, '#00F'], [0.5, '#0F0'], [1, '#F00']],
+        // colorscale: [[0, '#6fdbff'], [0.5, '#bdff6a'], [1, '#ff6363']],
+        colorscale: [[0, '#ffffff'], [0.5, '#808080'], [1, '#000000']],
         opacity: 0,
         //visible: false,
         // line:{
@@ -153,6 +155,20 @@ function update_gradient() {
     let size = GRADIENT_RESOLUTION;
     let nn_output, i, j, x, y;
     let gradient_matrix = gradient_object['z'];
+    // for(i = 0; i < size; i++) {
+    //     x = -5 + i * 0.1;
+    //     for(j = 0; j < size; j++) {
+    //         y = -5 + j * 0.1;
+    //         nn_output = predict([x, y]);
+    //         if(nn_output[2] === 1){
+    //             gradient_matrix[j][i] = 1;
+    //         }else if (nn_output[1] === 1){
+    //             gradient_matrix[j][i] = .5;
+    //         }else if (nn_output[0] === 1){
+    //             gradient_matrix[j][i] = 0;
+    //         }
+    //    }
+    // }
     for(i = 0; i < size; i++) {
         x = -5 + i * 0.1;
         for(j = 0; j < size; j++) {
@@ -162,8 +178,8 @@ function update_gradient() {
             for (let k = 0; k < nn_output.length; k++) {
                 sum += nn_output[k];
             }
-            gradient_matrix[i][j] = sum;
-       }
+            gradient_matrix[j][i] = sum;
+        }
     }
     Plotly.redraw('main_plot');
 }
@@ -199,7 +215,6 @@ function predict(data){
 function train(){
     let max_epochs = parseInt(document.getElementById("epochNumber").value);
     for (let i = 0; i < max_epochs; i++){
-        if(i%100==0){}
         let finish = false;
         for (const data in training_data) {
             finish = nn.train(training_data[data].inputs,training_data[data].outputs, i)

@@ -10,5 +10,6 @@
     <orderEntry type="library" name="jquery-3.5.1" level="application" />
     <orderEntry type="library" name="mathjs" level="application" />
     <orderEntry type="library" name="chartjs-plugin-annotation" level="application" />
+    <orderEntry type="library" name="plotly-latest" level="application" />
   </component>
 </module>
