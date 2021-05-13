@@ -62,10 +62,10 @@ function initialize_gradient(){
         z: z,
         x: x,
         y: y,
-        // type: 'heatmap',
-        type: 'contour',
-        // colorscale: [[0, '#6fdbff'], [0.5, '#bdff6a'], [1, '#ff6363']],
-        colorscale: [[0, '#ffffff'], [0.5, '#808080'], [1, '#000000']],
+        type: 'heatmap',
+        colorscale: [[0, '#6fdbff'], [0.5, '#bdff6a'], [1, '#ff6363']],
+        // type: 'contour',
+        // colorscale: [[0, '#ffffff'], [0.5, '#808080'], [1, '#000000']],
         opacity: 0,
         //visible: false,
         // line:{
@@ -109,6 +109,12 @@ function initialize_gradient(){
     var layout = {
         showlegend: false,
         hovermode:'closest',
+        xaxis: {
+            range: [-5, 5],
+        },
+        yaxis: {
+            range: [-5, 5],
+        },
     };
     var data = [contour, rojos, verdes, azules];
     plot_data = data;
@@ -159,8 +165,7 @@ function add_lines() {
         weights = nn.weights_ih;
     }
     weights.data.forEach(neuron => {
-        let coordinates = get_coordinates([1].concat(neuron));
-        let line_set = coordinates;
+        let line_set = get_coordinates([1].concat(neuron));
         line_set['mode'] = 'line';
         line_set['type'] = 'scatter';
         line_set['marker'] = {color: '#CCC'};
@@ -189,32 +194,32 @@ function update_gradient() {
     let size = GRADIENT_RESOLUTION;
     let nn_output, i, j, x, y;
     let gradient_matrix = gradient_object['z'];
-    // for(i = 0; i < size; i++) {
-    //     x = -5 + i * 0.1;
-    //     for(j = 0; j < size; j++) {
-    //         y = -5 + j * 0.1;
-    //         nn_output = predict([x, y]);
-    //         if(nn_output[2] === 1){
-    //             gradient_matrix[j][i] = 1;
-    //         }else if (nn_output[1] === 1){
-    //             gradient_matrix[j][i] = .5;
-    //         }else if (nn_output[0] === 1){
-    //             gradient_matrix[j][i] = 0;
-    //         }
-    //    }
-    // }
     for(i = 0; i < size; i++) {
         x = -5 + i * 0.1;
         for(j = 0; j < size; j++) {
             y = -5 + j * 0.1;
-            nn_output = nn.feedforward([x, y]);
-            let sum = 0;
-            for (let k = 0; k < nn_output.length; k++) {
-                sum += nn_output[k];
+            nn_output = predict([x, y]);
+            if(nn_output[2] === 1){
+                gradient_matrix[j][i] = 1;
+            }else if (nn_output[1] === 1){
+                gradient_matrix[j][i] = .5;
+            }else if (nn_output[0] === 1){
+                gradient_matrix[j][i] = 0;
             }
-            gradient_matrix[j][i] = sum;
-        }
+       }
     }
+    // for(i = 0; i < size; i++) {
+    //     x = -5 + i * 0.1;
+    //     for(j = 0; j < size; j++) {
+    //         y = -5 + j * 0.1;
+    //         nn_output = nn.feedforward([x, y]);
+    //         let sum = 0;
+    //         for (let k = 0; k < nn_output.length; k++) {
+    //             sum += nn_output[k];
+    //         }
+    //         gradient_matrix[j][i] = sum;
+    //     }
+    // }
     Plotly.redraw('main_plot');
 }
 

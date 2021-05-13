@@ -53,6 +53,17 @@ class Matrix {
         return average
     }
 
+    static average_normal(a) {
+        let b = Matrix.fromArray(a);
+        let average = 0;
+        for (let i = 0; i < b.rows; i++) {
+            for (let j = 0; j < b.cols; j++) {
+                average = average + b.data[i][j];
+            }
+        }
+        return average
+    }
+
     randomize() {
         return this.map(e => Math.random() * 2 - 1);
     }

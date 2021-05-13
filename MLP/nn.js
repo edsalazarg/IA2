@@ -185,7 +185,6 @@ class NeuralNetwork{
                 return true;
             }
 
-
             // Calculate gradient descent
             let gradients = Matrix.map(outputs,sigmoid);
             gradients.multiply(output_errors);
