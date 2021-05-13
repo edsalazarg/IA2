@@ -13,6 +13,7 @@ class NeuralNetwork{
         this.learning_rate = learning_rate;
         this.desired_error = desired_error;
         this.all_errors = [];
+        this.average = 0;
 
         if(this.hl2 === false){
             this.input_nodes = numI;
@@ -89,17 +90,19 @@ class NeuralNetwork{
         }
     }
 
-    calculate_error(a,current_iter){
+    calculate_error(a){
         let average = a.average();
-        if (average < this.desired_error)
-            this.all_errors.push(average);
-        else if (current_iter % 20 === 0){
-            this.all_errors.push(average);
-        }
-        return average < this.desired_error;
+        this.average += average;
     }
 
-    train(input_array, target_array,current_iter){
+    error_average(data_length){
+        let sqr = Math.sqrt(this.average);
+        let average = sqr / data_length;
+        this.all_errors.push(average)
+        return average;
+    }
+
+    train(input_array, target_array){
         if (this.hl2 === false){
             // FEEDFORWARD
             // Generating the Hidden Outputs
@@ -120,9 +123,7 @@ class NeuralNetwork{
             // Calculate the error
             // ERROR = TARGETS - OUTPUTS
             let output_errors = Matrix.subtract(targets, outputs);
-            if (this.calculate_error(output_errors,current_iter)){
-                return true;
-            }
+            this.calculate_error(output_errors);
 
             // Calculate gradient
             let gradients = Matrix.map(outputs, dsigmoid);
@@ -181,9 +182,7 @@ class NeuralNetwork{
             // ERROR = TARGETS - OUTPUTS
             let output_errors = Matrix.subtract(targets, outputs);
 
-            if (this.calculate_error(output_errors, current_iter)){
-                return true;
-            }
+            this.calculate_error(output_errors);
 
             // Calculate gradient descent
             let gradients = Matrix.map(outputs,sigmoid);
@@ -236,6 +235,5 @@ class NeuralNetwork{
             // Adjust the bias by its deltas
             this.bias_h1.add(hidden1_gradient);
         }
-        return false;
     }
 }

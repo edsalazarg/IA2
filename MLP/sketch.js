@@ -252,18 +252,21 @@ function predict(data){
 }
 
 function train(){
+    let desired_error = parseFloat(document.getElementById("desiredError").value);
     let max_epochs = parseInt(document.getElementById("epochNumber").value);
     for (let i = 0; i < max_epochs; i++){
         let finish = false;
         for (const data in training_data) {
-            finish = nn.train(training_data[data].inputs,training_data[data].outputs, i)
+            nn.train(training_data[data].inputs,training_data[data].outputs, i)
         }
-        if(finish){
+        if(nn.error_average(training_data.length) < desired_error){
             document.getElementById("epochtotal").value = i;
-            errorChart.data.labels = range(0,i+1,20)
+            errorChart.data.labels = range(0,i+1)
             errorChart.data.datasets[0].data = nn.all_errors;
             errorChart.update()
             break;
+        }else{
+            nn.average = 0;
         }
     }
     gradient_object['opacity'] = 1;
