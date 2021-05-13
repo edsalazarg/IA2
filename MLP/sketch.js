@@ -10,6 +10,7 @@ var gradient_matrix;
 var gradient_object;
 var main_plot;
 var datasets = {};
+var plot_data;
 
 var ctx2 = document.getElementById('errorChart');
 var errorChart = new Chart(ctx2, {
@@ -110,6 +111,7 @@ function initialize_gradient(){
         hovermode:'closest',
     };
     var data = [contour, rojos, verdes, azules];
+    plot_data = data;
     Plotly.newPlot('main_plot', data, layout, {responsive: true});
     //Evento click
     main_plot.on('plotly_click', function(data){
@@ -146,10 +148,42 @@ function initialize_gradient(){
             inputs: [valueX,valueY],
             outputs: output,
         });
-        Plotly.redraw('main_plot')
+        Plotly.redraw('main_plot');
     });
 }
 
+function add_lines() {
+    let num_layers = parseInt(document.getElementById("hidden_layers").value);
+    let weights = nn.weights_ih1;
+    if (num_layers == 1){
+        weights = nn.weights_ih;
+    }
+    weights.data.forEach(neuron => {
+        let coordinates = get_coordinates([1].concat(neuron));
+        let line_set = coordinates;
+        line_set['mode'] = 'line';
+        line_set['type'] = 'scatter';
+        line_set['marker'] = {color: '#CCC'};
+        plot_data.push(line_set);
+    });
+    Plotly.redraw('main_plot');
+}
+
+function get_coordinates(weights){
+    let coordinates = {
+      x:[],
+      y:[]
+    }
+    let slope = -(weights[0]/weights[2])/(weights[0]/weights[1])
+    let intercept = -weights[0]/weights[2]
+    for (let i = -5; i<=5; i+=10){
+        y1 = (slope*i) + intercept
+
+        coordinates['x'].push(i);
+        coordinates['y'].push(y1);
+    }
+    return coordinates
+}
 
 function update_gradient() {
     let size = GRADIENT_RESOLUTION;
@@ -198,7 +232,7 @@ function initialize(){
         boolean_hl2 = true;
     }
     nn = new NeuralNetwork(2,hidden_layers_neurons,3, learning_rate,desired_error, boolean_hl2);
-
+    add_lines();
     document.getElementById('train').disabled = false;
     showWeights(boolean_hl2);
 }
