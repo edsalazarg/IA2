@@ -6,6 +6,11 @@ let red_array = [0,0,1];
 let green_array = [0,1,0];
 let blue_array = [1,0,0];
 
+var gradient_matrix;
+var gradient_object;
+var main_plot;
+var datasets = {};
+
 var ctx2 = document.getElementById('errorChart');
 var errorChart = new Chart(ctx2, {
     type: 'line',
@@ -33,68 +38,135 @@ var errorChart = new Chart(ctx2, {
     }
 });
 
-var ctx = document.getElementById('myChart');
-var myChart = new Chart(ctx, {
-    type: 'scatter',
-    data: {
-        datasets: [{
-                label: 'Red data',
-                data: [],
-                backgroundColor: '#FF0000',
-            },
-            {
-                label: 'Green Data',
-                data: [],
-                backgroundColor: '#26ff00'
-            },
-            {
-                label: 'Blue Data',
-                data: [],
-                backgroundColor: '#0040ff'
-            },
-            {
-                label: 'Weighted Line',
-                data: [],
-                showLine: true,
-                fill: false,
-                backgroundColor: '#fff200',
-                borderColor: '#fff200',
-            },
-            {
-                label: 'Test Data',
-                data: [],
-                backgroundColor: '#c800ff'
-            },
-        ]
-    },
-    options: {
-        scales: {
-            xAxes: [{
-                type: "linear",
-                display: true,
-                ticks: {
-                    max: 5,
-                    min: -5,
-                },
-                scaleLabel: {
-                    display: true,
-                    labelString: 'X-Axis'
-                }
-            }, ],
-            yAxes: [{
-                display: true,
-                scaleLabel: {
-                    display: true,
-                    labelString: 'Y-Axis'
-                },
-                ticks: {
-                    max: 5,
-                    min: -5,
-                },
-            }]
+$(document).ready(initialize_gradient);
+
+function initialize_gradient(){
+    main_plot = document.getElementById('main_plot');
+    let size = GRADIENT_RESOLUTION = 100;
+    let x = new Array(size), y = new Array(size), z = new Array(size), i, j;
+    //Assign x and y 100 values between -5 and 5
+    //also assign z 100 arrays so we have a matrix of 100 * 100
+    for(i = 0; i < GRADIENT_RESOLUTION; i++){
+        x[i] = y[i] = - 5 + i * 0.1;
+        z[i] = new Array(size);
+    }
+    //set all z values to 0
+    for(i = 0; i < size; i++) {
+        for(j = 0; j < size; j++) {
+            z[i][j] = 0;
+       }
+    }
+    //data used for contour
+    var contour = {
+        z: z,
+        x: x,
+        y: y,
+        type: 'contour',
+        colorscale: [[0, '#00F'], [0.5, '#0F0'], [1, '#F00']],
+        opacity: 0,
+        //visible: false,
+        // line:{
+        //     smoothing: 0.85
+        //   },
+    }
+    gradient_object = contour;
+
+    var rojos = {
+        mode: 'markers',
+        type: 'scatter',
+        x:[],
+        y:[],
+        marker: {
+            color: '#FF0000',
         }
     }
-});
+    datasets['0'] = rojos;
+
+    var verdes = {
+        mode: 'markers',
+        type: 'scatter',
+        x:[],
+        y:[],
+        marker: {
+            color: '#26ff00',
+        }
+    }
+    datasets['1'] = verdes;
+
+    var azules = {
+        mode: 'markers',
+        type: 'scatter',
+        x:[],
+        y:[],
+        marker: {
+            color: '#0040ff',
+        }
+    }
+    datasets['2'] = azules;
+    var layout = {
+        showlegend: false,
+        hovermode:'closest',
+    };
+    var data = [contour, rojos, verdes, azules];
+    Plotly.newPlot('main_plot', data, layout, {responsive: true});
+    //Evento click
+    main_plot.on('plotly_click', function(data){
+        let coords = data['points'][0];
+        let valueX = coords['x'].toPrecision(4); 
+        let valueY = coords['y'].toPrecision(4);
+        let group = document.getElementById("groupColors").value    
+        let output = [];
+        let tabla;
+        datasets[group]['x'].push(valueX);
+        datasets[group]['y'].push(valueY);
+        switch (group){
+            case "0":
+                output = [0,0,1];
+                tabla = document.getElementById('tablaRojos').getElementsByTagName('tbody')[0];
+                break;
+            case "1":
+                output = [0,1,0];
+                tabla = document.getElementById('tablaVerdes').getElementsByTagName('tbody')[0];
+                break;
+            case "2":
+                output = [1,0,0];
+                tabla = document.getElementById('tablaAzules').getElementsByTagName('tbody')[0];
+                break;
+        }
+        var newRow = tabla.insertRow();
+        var newCell = newRow.insertCell();
+        var newText = document.createTextNode(valueX);
+        newCell.appendChild(newText);
+        newCell = newRow.insertCell();
+        newText = document.createTextNode(valueY);
+        newCell.appendChild(newText);
+        training_data.push({
+            inputs: [valueX,valueY],
+            outputs: output,
+        });
+        Plotly.redraw('main_plot')
+    });
+}
+
+
+function update_gradient() {
+    let size = GRADIENT_RESOLUTION;
+    let nn_output, i, j, x, y;
+    let gradient_matrix = gradient_object['z'];
+    for(i = 0; i < size; i++) {
+        x = -5 + i * 0.1;
+        for(j = 0; j < size; j++) {
+            y = -5 + j * 0.1;
+            nn_output = nn.feedforward([x, y]);
+            let sum = 0;
+            for (let k = 0; k < nn_output.length; k++) {
+                sum += nn_output[k];
+            }
+            gradient_matrix[i][j] = sum;
+       }
+    }
+    Plotly.redraw('main_plot');
+}
 
 function showWeights(hl2){
 
@@ -127,6 +199,7 @@ function predict(data){
 function train(){
     let max_epochs = parseInt(document.getElementById("epochNumber").value);
     for (let i = 0; i < max_epochs; i++){
+        if(i%100==0){}
         let finish = false;
         for (const data in training_data) {
             finish = nn.train(training_data[data].inputs,training_data[data].outputs, i)
@@ -139,91 +212,8 @@ function train(){
             break;
         }
     }
-}
-
-
-
-document.getElementById('myChart').onmousedown = FuncOnClick;
-
-function FuncOnClick(event) {
-    let scaleRef,
-        valueX,
-        valueY;
-    for (var scaleKey in myChart.scales) {
-        scaleRef = myChart.scales[scaleKey];
-        if (scaleRef.isHorizontal() && scaleKey === 'x-axis-1') {
-            valueX = scaleRef.getValueForPixel(event.offsetX);
-
-        } else if (scaleKey === 'y-axis-1') {
-            valueY = scaleRef.getValueForPixel(event.offsetY);
-        }
-    }
-    if (trained){
-        //    Agregar set de datos para despues de entranado
-        myChart.data.datasets[4].data.push({
-            x: valueX,
-            y: valueY
-        });
-
-        // WE NEED TO CHECK THE PREDICTION
-        prediction = nn.feedforward([x,y])
-        if (prediction === 1){
-            prediction = "Azul"
-        }else{
-            prediction = "Rojo"
-        }
-
-        var tabla = document.getElementById('tablaPrueba').getElementsByTagName('tbody')[0];
-        var newRow = tabla.insertRow();
-        var newCell = newRow.insertCell();
-        var newText = document.createTextNode(valueX.toFixed(2));
-        newCell.appendChild(newText);
-        newCell = newRow.insertCell();
-        newText = document.createTextNode(valueY.toFixed(2));
-        newCell.appendChild(newText);
-        newCell = newRow.insertCell();
-        newText = document.createTextNode(prediction);
-        newCell.appendChild(newText);
-        myChart.update();
-    }else{
-        if (valueY < 5 && valueY > -5 && valueX < 5 && valueX > -5 ){
-            //Dibujar punto en la grafica
-            let group = document.getElementById("groupColors").value
-            myChart.data.datasets[group].data.push({
-                x: valueX,
-                y: valueY
-            });
-            let output = [];
-            let tabla;
-            switch (group){
-                case "0":
-                    output = [0,0,1];
-                    tabla = document.getElementById('tablaRojos').getElementsByTagName('tbody')[0];
-                    break;
-                case "1":
-                    output = [0,1,0];
-                    tabla = document.getElementById('tablaVerdes').getElementsByTagName('tbody')[0];
-                    break;
-                case "2":
-                    output = [1,0,0];
-                    tabla = document.getElementById('tablaAzules').getElementsByTagName('tbody')[0];
-                    break;
-            }
-
-            var newRow = tabla.insertRow();
-            var newCell = newRow.insertCell();
-            var newText = document.createTextNode(valueX.toFixed(2));
-            newCell.appendChild(newText);
-            newCell = newRow.insertCell();
-            newText = document.createTextNode(valueY.toFixed(2));
-            newCell.appendChild(newText);
-            training_data.push({
-                inputs: [valueX,valueY],
-                outputs: output,
-            });
-            myChart.update();
-        }
-    }
+    gradient_object['opacity'] = 1;
+    update_gradient();
 }
 
 function range(start, stop, step){
