@@ -254,8 +254,9 @@ function predict(data){
 function train(){
     let desired_error = parseFloat(document.getElementById("desiredError").value);
     let max_epochs = parseInt(document.getElementById("epochNumber").value);
+    let finish = false;
     for (let i = 0; i < max_epochs; i++){
-        let finish = false;
+
         for (const data in training_data) {
             nn.train(training_data[data].inputs,training_data[data].outputs, i)
         }
@@ -264,10 +265,16 @@ function train(){
             errorChart.data.labels = range(0,i+1)
             errorChart.data.datasets[0].data = nn.all_errors;
             errorChart.update()
+            finish = true;
             break;
         }else{
             nn.average = 0;
         }
+    }
+    if(finish === false){
+        errorChart.data.labels = range(0,nn.all_errors.length);
+        errorChart.data.datasets[0].data = nn.all_errors;
+        errorChart.update()
     }
     gradient_object['opacity'] = 1;
     update_gradient();
