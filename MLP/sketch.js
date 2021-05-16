@@ -8,6 +8,10 @@ let blue_array = [1,0,0];
 
 var gradient_matrix;
 var gradient_object;
+var colorscales = {
+    "0":[[0, '#ffffff'], [0.5, '#808080'], [1, '#000000']],
+    "1":[[0, '#6fdbff'], [0.5, '#bdff6a'], [1, '#ff6363']]
+};
 var main_plot;
 var datasets = {};
 var plot_data;
@@ -64,13 +68,7 @@ function initialize_gradient(){
         y: y,
         type: 'heatmap',
         colorscale: [[0, '#6fdbff'], [0.5, '#bdff6a'], [1, '#ff6363']],
-        // type: 'contour',
-        // colorscale: [[0, '#ffffff'], [0.5, '#808080'], [1, '#000000']],
-        opacity: 0,
-        //visible: false,
-        // line:{
-        //     smoothing: 0.85
-        //   },
+        opacity: 0
     }
     gradient_object = contour;
 
@@ -164,6 +162,11 @@ function add_lines() {
     if (num_layers == 1){
         weights = nn.weights_ih;
     }
+    if(plot_data.length > 4){
+        weights.data.forEach(neuron =>{
+            plot_data.pop();
+        });
+    }
     weights.data.forEach(neuron => {
         let line_set = get_coordinates([1].concat(neuron));
         line_set['mode'] = 'line';
@@ -208,20 +211,14 @@ function update_gradient() {
             }
        }
     }
-    // for(i = 0; i < size; i++) {
-    //     x = -5 + i * 0.1;
-    //     for(j = 0; j < size; j++) {
-    //         y = -5 + j * 0.1;
-    //         nn_output = nn.feedforward([x, y]);
-    //         let sum = 0;
-    //         for (let k = 0; k < nn_output.length; k++) {
-    //             sum += nn_output[k];
-    //         }
-    //         gradient_matrix[j][i] = sum;
-    //     }
-    // }
     Plotly.redraw('main_plot');
 }
+
+$('#plot_color_select').change(function (e) {
+    let selected_color = e.target.value;
+    plot_data[0].colorscale = colorscales[selected_color]
+    Plotly.redraw('main_plot');
+})
 
 function showWeights(hl2){
 
@@ -233,6 +230,7 @@ function initialize(){
     let learning_rate = parseFloat(document.getElementById("learningRate").value);
     let desired_error = parseFloat(document.getElementById("desiredError").value);
     let boolean_hl2 = false;
+
     if (hidden_layers === 2){
         boolean_hl2 = true;
     }
@@ -278,6 +276,7 @@ function train(){
     }
     gradient_object['opacity'] = 1;
     update_gradient();
+    trained = true;
 }
 
 function range(start, stop, step){
