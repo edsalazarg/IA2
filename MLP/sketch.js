@@ -8,6 +8,7 @@ let blue_array = [1,0,0];
 
 var gradient_matrix;
 var gradient_object;
+var solid_object;
 var colorscales = {
     "0":[[0, '#ffffff'], [0.5, '#808080'], [1, '#000000']],
     "1":[[0, '#6fdbff'], [0.5, '#bdff6a'], [1, '#ff6363']]
@@ -196,27 +197,60 @@ function get_coordinates(weights){
 function update_gradient() {
     let size = GRADIENT_RESOLUTION;
     let nn_output, i, j, x, y;
-    let gradient_matrix = gradient_object['z'];
+    gradient_matrix = new Array(size);
+    solid_object = new Array(size);
+    for(i = 0; i < GRADIENT_RESOLUTION; i++){
+        solid_object[i] = new Array(size);
+        gradient_matrix[i] = new Array(size);
+    }
+
+    for(i = 0; i < size; i++) {
+        for(j = 0; j < size; j++) {
+            solid_object[i][j] = 0;
+            gradient_matrix[i][j] = 0;
+        }
+    }
     for(i = 0; i < size; i++) {
         x = -5 + i * 0.1;
         for(j = 0; j < size; j++) {
             y = -5 + j * 0.1;
             nn_output = predict([x, y]);
             if(nn_output[2] === 1){
-                gradient_matrix[j][i] = 1;
+                solid_object[j][i] = 1;
             }else if (nn_output[1] === 1){
-                gradient_matrix[j][i] = .5;
+                solid_object[j][i] = .5;
             }else if (nn_output[0] === 1){
-                gradient_matrix[j][i] = 0;
+                solid_object[j][i] = 0;
             }
        }
     }
+    for(i = 0; i < size; i++) {
+        x = -5 + i * 0.1;
+        for(j = 0; j < size; j++) {
+            y = -5 + j * 0.1;
+            nn_output = nn.feedforward([x, y]);
+            let sum = 0;
+            for (let k = 0; k < nn_output.length; k++) {
+                sum += nn_output[k];
+            }
+            gradient_matrix[j][i] = sum;
+        }
+    }
+    gradient_object['z'] = solid_object;
     Plotly.redraw('main_plot');
 }
 
 $('#plot_color_select').change(function (e) {
     let selected_color = e.target.value;
-    plot_data[0].colorscale = colorscales[selected_color]
+    if(selected_color==="0"){
+        gradient_object.type = 'contour';
+        gradient_object['z'] = gradient_matrix;
+        gradient_object.colorscale = colorscales[selected_color]
+    }else{
+        gradient_object.type = 'heatmap';
+        gradient_object['z'] = solid_object;
+        gradient_object.colorscale = colorscales[selected_color]
+    }
     Plotly.redraw('main_plot');
 })
 
@@ -274,6 +308,9 @@ function train(){
         errorChart.data.datasets[0].data = nn.all_errors;
         errorChart.update()
     }
+    for (let x = plot_data.length; x>4; x--){
+        console.log(plot_data.pop(x));
+    }
     gradient_object['opacity'] = 1;
     update_gradient();
     trained = true;
@@ -284,13 +321,13 @@ function range(start, stop, step){
         // one param defined
         stop = start;
         start = 0;
-    };
+    }
     if (typeof step=='undefined'){
         step = 1;
-    };
+    }
     var result = [];
     for (var i=start; step>0 ? i<stop : i>stop; i+=step){
         result.push(i);
-    };
+    }
     return result;
-};
+}
